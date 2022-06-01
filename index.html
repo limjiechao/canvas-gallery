@@ -15,21 +15,21 @@
 
 <aside id="interface">
   <div id="image-section">
-    <h1 class="image-number">Image <span id="current-image-number">Number</span></h1>
+    <h1 id="image-id"></h1>
 
     <div id="image-browser">
-      <button id="next-button" class="text-button" type="button">Back</button>
+      <button id="image-back-button" class="text-button" type="button">Back</button>
 
-      <span class="current-image-number">1</span> of <span id="total-image-count">12</span>
+      <span id="image-pagination">No images</span>
 
-      <button id="back-button" class="text-button" type="button">Next</button>
+      <button id="image-next-button" class="text-button" type="button">Next</button>
     </div>
 
-    <button id="delete-image-button" class="delete-button primary-button" type="submit">
-      Delete
+    <button id="image-delete-button" class="delete-button primary-button" type="button">
+      Delete Image
     </button>
 
-    <button id="upload-image-button" class="primary-button" type="submit">
+    <button id="image-upload-button" class="primary-button" type="button">
       Upload New Image
     </button>
   </div>
@@ -37,33 +37,9 @@
   <div id="tag-section">
     <h1 class="tag-title">Tags</h1>
 
-    <div id="tags">
-      <div class="tag">
-        <span class="annotation">Secret Lab OMEGA - Cookies & Cream</span>
+    <div id="tags"></div>
 
-        <button class="delete-button text-button" type="button">Delete</button>
-      </div>
-
-      <div class="tag">
-        <span class="annotation">Secret Lab OMEGA - BLACK</span>
-
-        <button class="delete-button text-button" type="button">Delete</button>
-      </div>
-
-      <div class="tag">
-        <span class="annotation">Secret Lab OMEGA - BLACK</span>
-
-        <button class="delete-button text-button" type="button">Delete</button>
-      </div>
-
-      <div class="tag">
-        <span class="annotation">Secret Lab OMEGA - Cookies & Cream</span>
-
-        <button class="delete-button text-button" type="button">Delete</button>
-      </div>
-    </div>
-
-    <button id="clear-tags-button" type="button" class="primary-button">Clear All Tags</button>
+    <button id="tags-clear-button" type="button" class="primary-button">Clear All Tags</button>
   </div>
 </aside>
 
@@ -71,7 +47,7 @@
   <h1 id="unsupported-screen-size-message">Screen size below 375px width is not supported</h1>
 </div>
 
-<input type="file" id="upload-file-input" name="upload-file" accept="image/*">
+<input type="file" id="file-input" name="upload-file" accept="image/*">
 
 <template id="tag-template">
   <div class="tag">
