@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canvas Gallery</title>
+</head>
+<body>
+<div id="canvas-container">
+  <canvas id="canvas">
+    Canvas is not supported by your browser
+  </canvas>
+</div>
+
+<aside id="interface">
+  <div id="image-section">
+    <h1 class="image-number">Image <span id="current-image-number">Number</span></h1>
+
+    <div id="image-browser">
+      <button id="next-button" class="text-button" type="button">Back</button>
+
+      <span class="current-image-number">1</span> of <span id="total-image-count">12</span>
+
+      <button id="back-button" class="text-button" type="button">Next</button>
+    </div>
+
+    <button id="delete-image-button" class="delete-button primary-button" type="submit">
+      Delete
+    </button>
+
+    <button id="upload-image-button" class="primary-button" type="submit">
+      Upload New Image
+    </button>
+  </div>
+
+  <div id="tag-section">
+    <h1 class="tag-title">Tags</h1>
+
+    <div id="tags">
+      <div class="tag">
+        <span class="annotation">Secret Lab OMEGA - Cookies & Cream</span>
+
+        <button class="delete-button text-button" type="button">Delete</button>
+      </div>
+
+      <div class="tag">
+        <span class="annotation">Secret Lab OMEGA - BLACK</span>
+
+        <button class="delete-button text-button" type="button">Delete</button>
+      </div>
+
+      <div class="tag">
+        <span class="annotation">Secret Lab OMEGA - BLACK</span>
+
+        <button class="delete-button text-button" type="button">Delete</button>
+      </div>
+
+      <div class="tag">
+        <span class="annotation">Secret Lab OMEGA - Cookies & Cream</span>
+
+        <button class="delete-button text-button" type="button">Delete</button>
+      </div>
+    </div>
+
+    <button id="clear-tags-button" type="button" class="primary-button">Clear All Tags</button>
+  </div>
+</aside>
+
+<div id="unsupported-screen-size-section">
+  <h1 id="unsupported-screen-size-message">Screen size below 375px width is not supported</h1>
+</div>
+
+<input type="file" id="upload-file-input" name="upload-file" accept="image/*">
+
+<template id="tag-template">
+  <div class="tag">
+    <span class="annotation"></span>
+
+    <button class="delete-button text-button" type="button">Delete</button>
+  </div>
+</template>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
