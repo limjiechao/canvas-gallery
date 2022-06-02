@@ -5,6 +5,7 @@ import {
   Dimension,
   Dimensions,
   ImageDataUrl,
+  TaggedImage,
 } from './indexed.db';
 import { canvasElement } from './elements';
 
@@ -108,6 +109,23 @@ export function computeImageCanvasParameters(
 
   return { height, width, x, y };
 }
+
+// Local storage helper functions
+const currentImageIdLocalStorageKey = 'currentImageId';
+
+export function getSavedTaggedImageId(): number {
+  const rawIndex =
+    window.localStorage.getItem(currentImageIdLocalStorageKey) ?? NaN;
+
+  return Number(rawIndex);
+}
+
+export function setSavedImageId(id: TaggedImage['id']): void {
+  window.localStorage.setItem(currentImageIdLocalStorageKey, `${id}`);
+}
+
+export function resetSavedTaggedImageId(): void {
+  window.localStorage.removeItem(currentImageIdLocalStorageKey);
 }
 
 // General helper functions
