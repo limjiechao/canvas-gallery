@@ -46,7 +46,7 @@ export const tagsCache = {
     return this._tags;
   },
   set list(tags: Tags) {
-    this._tags = tags;
+    this._tags = structuredClone(tags);
   },
 };
 
@@ -70,7 +70,7 @@ export function resetTagsCache(): void {
 
 export function setTagsCache(tags: Tags): void {
   log(setTagsCache.name);
-  tagsCache.list = [...tags];
+  tagsCache.list = tags;
 }
 
 export async function drawTaggedImage(
@@ -99,7 +99,7 @@ async function setTaggedImageToCache(
     ? Promise.resolve(createdImageElement)
     : createImageFromSource(dataUrl));
   imageCache.parameters = { x, y, width, height };
-  tagsCache.list = [...tags];
+  tagsCache.list = tags;
 }
 
 export function drawTaggedImageFromCache() {

@@ -57,7 +57,6 @@ function handleMouseDown(event: MouseEvent): void {
 async function handleMouseUp(): Promise<void> {
   log(handleMouseUp.name);
 
-  log(mouseButton);
   mouseButton.state = 'up';
 
   // NOTE: Deliberately draw over existing highlight box to indicate to user the selected area is confirmed

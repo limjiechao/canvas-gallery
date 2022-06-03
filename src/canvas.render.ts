@@ -3,6 +3,7 @@ import {
   CanvasParameters,
   CanvasParameterType,
   Coordinates,
+  Dimensions,
   TagAnnotation,
   TagBox,
   TaggedImage,
@@ -95,13 +96,15 @@ export type PositionalCanvasArguments = [
   height: CanvasParameterType
 ];
 
-function initialDraw(
+function initialDraw<
+  SelectedCanvasParameters extends CanvasParameters | Dimensions | Coordinates
+>(
   selectionCoordinates: SelectionCoordinates,
   draw: (
     context: CanvasRenderingContext2D,
     [x, y, width, height]: PositionalCanvasArguments
-  ) => void
-): CanvasParameters {
+  ) => SelectedCanvasParameters
+): SelectedCanvasParameters {
   log(initialDraw.name);
   const axisScales = computeAxisScales();
   const { x, y, width, height } = computePath(axisScales, selectionCoordinates);
@@ -109,11 +112,11 @@ function initialDraw(
 
   context.beginPath();
 
-  draw(context, [x, y, width, height]);
+  const canvasParameters = draw(context, [x, y, width, height]);
 
   context.closePath();
 
-  return { x, y, width, height };
+  return canvasParameters;
 }
 
 export function drawHighlightBox(
@@ -121,16 +124,21 @@ export function drawHighlightBox(
 ): void {
   log(drawHighlightBox.name);
 
-  initialDraw(selectionCoordinates, (context, [x, y, width, height]) => {
-    context.rect(x, y, width, height);
+  initialDraw<CanvasParameters>(
+    selectionCoordinates,
+    (context, [x, y, width, height]) => {
+      context.rect(x, y, width, height);
 
-    context.lineWidth = strokeWidth;
-    context.strokeStyle = blue;
-    context.stroke();
+      context.lineWidth = strokeWidth;
+      context.strokeStyle = blue;
+      context.stroke();
 
-    context.fillStyle = translucentBlue;
-    context.fill();
-  });
+      context.fillStyle = translucentBlue;
+      context.fill();
+
+      return { x, y, width, height };
+    }
+  );
 }
 
 export function drawTagBox(
@@ -138,9 +146,14 @@ export function drawTagBox(
 ): CanvasParameters {
   log(drawTagBox.name);
 
-  return initialDraw(selectionCoordinates, (context, [x, y, width, height]) => {
-    redrawTagBox(context, { x, y, width, height });
-  });
+  return initialDraw<CanvasParameters>(
+    selectionCoordinates,
+    (context, [x, y, width, height]) => {
+      redrawTagBox(context, { x, y, width, height });
+
+      return { x, y, width, height };
+    }
+  );
 }
 
 export function redrawTagBox(
@@ -160,7 +173,7 @@ export function drawTagAnnotation(
 ): Coordinates {
   log(drawTagAnnotation.name);
 
-  const { x, y } = initialDraw(
+  const { x, y } = initialDraw<Coordinates>(
     selectionCoordinates,
     (context, positionalCanvasArguments) => {
       const orientation = computeOrientation(selectionCoordinates);
@@ -170,6 +183,8 @@ export function drawTagAnnotation(
       );
 
       redrawTagAnnotation(context, { text, x, y });
+
+      return { x, y };
     }
   );
 
