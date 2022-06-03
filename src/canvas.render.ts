@@ -12,7 +12,9 @@ import { RenderParameters } from './main';
 import {
   clearCanvas,
   computeAxisScales,
+  computeOrientation,
   computePath,
+  computeTextPlacement,
   getCanvas2dContext,
 } from './canvas.helpers';
 
@@ -127,16 +129,18 @@ export interface SelectionCoordinates {
  *   ])
  * */
 
+export type PositionalCanvasArguments = [
+  x: CanvasParameterType,
+  y: CanvasParameterType,
+  width: CanvasParameterType,
+  height: CanvasParameterType
+];
+
 function useCanvas(
   selectionCoordinates: SelectionCoordinates,
   draw: (
     context: CanvasRenderingContext2D,
-    [x, y, width, height]: [
-      CanvasParameterType,
-      CanvasParameterType,
-      CanvasParameterType,
-      CanvasParameterType
-    ]
+    [x, y, width, height]: PositionalCanvasArguments
   ) => void
 ) {
   log(useCanvas.name);
@@ -187,9 +191,17 @@ export function drawTagAnnotation(
   text: string
 ) {
   log(drawTagAnnotation.name);
-  useCanvas(selectionCoordinates, (context, [x, y]) => {
+
+  useCanvas(selectionCoordinates, (context, positionalCanvasArguments) => {
+    const orientation = computeOrientation(selectionCoordinates);
+    const { x, y } = computeTextPlacement(
+      orientation,
+      positionalCanvasArguments
+    );
+
     context.font = fontStyle;
     context.fillStyle = fontFillStyle;
+
     context.fillText(text, x + gapFromTagBox, y + gapFromTagBox + fontSize);
 
     context.closePath();

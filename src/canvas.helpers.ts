@@ -6,7 +6,10 @@ import {
   Dimension,
   Dimensions,
 } from './indexed.db';
-import { SelectionCoordinates } from './canvas.render';
+import {
+  PositionalCanvasArguments,
+  SelectionCoordinates,
+} from './canvas.render';
 
 const contextId = '2d' as const;
 
@@ -101,6 +104,55 @@ export function computePath(
   const height = (end.y - start.y) * yScale;
 
   return { x, y, width, height };
+}
+
+enum Direction {
+  Up = 'Up',
+  Down = 'Down',
+  Left = 'Left',
+  Right = 'Right',
+}
+
+interface Orientation {
+  x: Direction.Left | Direction.Right;
+  y: Direction.Up | Direction.Down;
+}
+
+export function computeOrientation(
+  selectionCoordinates: SelectionCoordinates
+): Orientation {
+  const { start, end } = selectionCoordinates;
+
+  const x = start.x < end.x ? Direction.Right : Direction.Left;
+  const y = start.y < end.y ? Direction.Down : Direction.Up;
+
+  return { x, y };
+}
+
+export function computeTextPlacement(
+  orientation: Orientation,
+  [x, y, width, height]: PositionalCanvasArguments
+): Coordinates {
+  const isLeft = orientation.x === Direction.Left;
+  const isRight = orientation.x === Direction.Right;
+  const isUp = orientation.y === Direction.Up;
+  const isDown = orientation.y === Direction.Down;
+
+  switch (true) {
+    case isLeft && isUp:
+      // Left + Up =>  Subtract width from `x` and subtract height from `y`
+      return { x: x + width, y: y + height };
+    case isLeft && isDown:
+      // Left + Down => Subtract width from `x`
+      return { x: x + width, y };
+    case isRight && isUp:
+      // Right + Up => Subtract height from `y`
+      return { x, y: y + height };
+    case isRight && isDown:
+    default:
+      // Right + Down => No modification
+      return { x, y };
+  }
 }
 
 export function setCanvasAbsoluteDimensions(window: Window): void {
