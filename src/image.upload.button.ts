@@ -1,15 +1,14 @@
 import { fileInput, imageUploadButton } from './elements';
 import { drawTaggedImage } from './canvas.render';
-import {
-  computeImageCanvasParameters,
-  createImageFromSource,
-  readFromFileInputEvent,
-  readImageFileAsDataUrl,
-  setSavedImageId,
-} from './utils';
+import { createImageFromSource, setSavedImageId } from './utils';
 import { log } from './logging';
 import { renderApp, taggedImageService } from './main';
 import { DraftTaggedImage } from './indexed.db';
+import {
+  readFromFileInputEvent,
+  readImageFileAsDataUrl,
+} from './image.upload.helpers';
+import { computeImageCanvasParameters } from './canvas.helpers';
 
 const openingFilePickerLabel = 'Opening file picker…' as const;
 const uploadNewImageLabel = 'Upload New Image' as const;

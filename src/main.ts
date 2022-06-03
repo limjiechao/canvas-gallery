@@ -1,14 +1,15 @@
 import './style.css';
 import { addUploadImageButtonRelatedEventListeners } from './image.upload.button';
 import { log } from './logging';
-import { renderCanvas, setCanvasAbsoluteDimensions } from './canvas.render';
-import { addCanvasRelatedEventListeners } from './canvas.actions';
+import { renderCanvas } from './canvas.render';
+import { addCanvasRelatedEventListeners } from './canvas.actions.create.tag';
 import { TaggedImages, TaggedImageService } from './indexed.db';
 import { renderImageBrowser } from './image.browser.render';
 import { addOtherImageButtonEventListeners } from './image.other.buttons';
 import { getSavedTaggedImageId } from './utils';
 import { addTagSectionButtonEventListeners } from './tags.buttons';
 import { renderTags } from './tags.render';
+import { setCanvasAbsoluteDimensions } from './canvas.helpers';
 
 export const taggedImageService = new TaggedImageService();
 export const taggedImages: TaggedImages = [];
@@ -27,30 +28,31 @@ async function handleReadyStateChange() {
 }
 
 export interface RenderData {
-  currentImageId: number;
-  currentImageIndex: number;
-  imageCount: number;
-  defaultImageId: number;
-  defaultImageIndex: number;
-  previousImageId: number;
-  nextImageId: number;
+  readonly currentImageId: number;
+  readonly currentImageIndex: number;
+  readonly imageCount: number;
+  readonly defaultImageId: number;
+  readonly defaultImageIndex: number;
+  readonly previousImageId: number;
+  readonly nextImageId: number;
 }
 
 export interface RenderConditions {
-  noIndex: boolean;
-  noImages: boolean;
-  noPreviousImageId: boolean;
-  noNextImageId: boolean;
+  readonly noIndex: boolean;
+  readonly noImages: boolean;
+  readonly noPreviousImageId: boolean;
+  readonly noNextImageId: boolean;
 }
 
 export interface RenderParameters {
-  computedData: RenderData;
-  computedConditions: RenderConditions;
+  readonly computedData: RenderData;
+  readonly computedConditions: RenderConditions;
 }
 
 export function computeRenderParameters(
   taggedImages: TaggedImages
 ): RenderParameters {
+  log(computeRenderParameters.name);
   // Load last image by `id` otherwise default to first tagged image
   const currentImageId = getSavedTaggedImageId();
   const currentImageIndex = taggedImages.findIndex(

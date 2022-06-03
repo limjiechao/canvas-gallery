@@ -44,9 +44,7 @@ export async function renderTags(
     : currentImageIndex;
   const taggedImage = taggedImages[currentOrDefaultImageId];
 
-  if (!taggedImage) {
-    return;
-  }
+  if (!taggedImage) return;
 
   const { tags } = taggedImage;
 

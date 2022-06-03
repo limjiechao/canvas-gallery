@@ -1,22 +1,64 @@
 import { log } from './logging';
-import { canvasElement } from './elements';
 import { createImageFromSource } from './utils';
 import {
   CanvasParameters,
+  CanvasParameterType,
   Coordinates,
   DraftTaggedImage,
   TaggedImage,
   TaggedImages,
 } from './indexed.db';
 import { RenderParameters } from './main';
+import {
+  clearCanvas,
+  computeAxisScales,
+  computePath,
+  getCanvas2dContext,
+} from './canvas.helpers';
 
-const contextId = '2d' as const;
+// Rendering entire canvas
 
-export function getCanvas2dContext() {
-  log(getCanvas2dContext.name);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return canvasElement.getContext && canvasElement.getContext(contextId)!;
+export async function renderCanvas(
+  {
+    computedConditions: { noIndex, noImages },
+    computedData: { currentImageIndex, defaultImageIndex },
+  }: RenderParameters,
+  taggedImages: TaggedImages
+): Promise<void> {
+  log(renderCanvas.name);
+  if (noImages) {
+    clearCanvas();
+  } else {
+    const image: TaggedImage =
+      taggedImages[noIndex ? defaultImageIndex : currentImageIndex];
+
+    await drawTaggedImage(image);
+  }
 }
+
+// Rendering images
+
+const image = {
+  _element: new Image() as HTMLImageElement,
+  _parameters: {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  } as CanvasParameters,
+  get element(): HTMLImageElement {
+    return this._element;
+  },
+  set element(image: HTMLImageElement) {
+    this._element = image;
+  },
+  get parameters(): CanvasParameters {
+    return this._parameters;
+  },
+  set parameters(parameters: CanvasParameters) {
+    this._parameters = parameters;
+  },
+};
 
 function drawImage(
   image: HTMLImageElement,
@@ -27,20 +69,25 @@ function drawImage(
   context.drawImage(image, x, y, width, height);
 }
 
+export function redrawImage() {
+  drawImage(image.element, image.parameters);
+}
+
 export async function drawTaggedImage(
   taggedImage: TaggedImage | DraftTaggedImage,
-  createdImage?: HTMLImageElement
+  createdImageElement?: HTMLImageElement
 ) {
   log(drawTaggedImage.name);
   const {
-    image: { dataUrl, x, y, height, width },
+    image: { dataUrl, x, y, width, height },
     tags,
   } = taggedImage;
-  const image = await (createdImage
-    ? Promise.resolve(createdImage)
+  image.element = await (createdImageElement
+    ? Promise.resolve(createdImageElement)
     : createImageFromSource(dataUrl));
+  image.parameters = { x, y, width, height };
 
-  drawImage(image, { x, y, height, width });
+  drawImage(image.element, image.parameters);
 
   // TODO: Redraw tags
   tags.forEach((tag) => {
@@ -48,26 +95,24 @@ export async function drawTaggedImage(
   });
 }
 
-export interface PointerCoordinates {
+// Rendering tags
+
+const lightGrey = '#858585';
+const blue = '#0099ff';
+const translucentBlue = `${blue}22`;
+
+const strokeStyle = lightGrey;
+const strokeWidth = 2;
+
+const fontSize = 24;
+const fontStyle = `${fontSize}px sans-serif`;
+const fontFillStyle = lightGrey;
+
+const gapFromTagBox = 8;
+
+export interface SelectionCoordinates {
   start: Coordinates;
   end: Coordinates;
-}
-
-export function selectAreaInCanvas(): Promise<PointerCoordinates> {
-  // On mouse down, `drawHighlightBox(…)` --> startCoordinates = endCoordinates
-  // On mouse move, `drawHighlightBox(…)` --> update endCoordinates
-  // On mouse up, clear highlight box, draw tag box, and prompt for annotation --> final endCoordinates
-
-  return Promise.resolve({
-    start: {
-      x: 0,
-      y: 0,
-    },
-    end: {
-      x: 0,
-      y: 0,
-    },
-  });
 }
 
 /**
@@ -82,128 +127,71 @@ export function selectAreaInCanvas(): Promise<PointerCoordinates> {
  *   ])
  * */
 
-type AxisScale = 'xScale' | 'yScale';
-type AxisScales = Record<AxisScale, number>;
-
-export function computeAxisScales(): AxisScales {
-  const absoluteWidth = canvasElement.width;
-  const absoluteHeight = canvasElement.height;
-
-  const scaledWidth = canvasElement.offsetWidth;
-  const scaledHeight = canvasElement.offsetHeight;
-
-  const xScale = absoluteWidth / scaledWidth;
-  const yScale = absoluteHeight / scaledHeight;
-
-  return { xScale, yScale };
-}
-
-export function computePath(
-  { xScale, yScale }: AxisScales,
-  { start, end }: PointerCoordinates
-): CanvasParameters {
-  const x = start.x * xScale;
-  const y = start.y * yScale;
-  const width = (end.x - start.x) * xScale;
-  const height = (end.y - start.y) * yScale;
-
-  return { x, y, width, height };
-}
-
-export function drawBox(pointerCoordinates: PointerCoordinates) {
-  const axisScales = computeAxisScales();
-  const { x, y, width, height } = computePath(axisScales, pointerCoordinates);
-
-  const context = getCanvas2dContext();
-  context.beginPath();
-  context.rect(x, y, width, height);
-  context.strokeStyle = '#aaaaaa';
-  context.closePath();
-}
-
-// TODO:
-export function drawHighlightBox(pointerCoordinates: PointerCoordinates) {
-  //
-  const axisScales = computeAxisScales();
-  const { x, y, width, height } = computePath(axisScales, pointerCoordinates);
-
-  const context = getCanvas2dContext();
-  context.beginPath();
-  context.rect(x, y, width, height);
-  context.strokeStyle = '#aaaaaa';
-  context.fillStyle = '#FF0000';
-  context.fill();
-  context.closePath();
-}
-
-// TODO:
-export function drawTagBox(
-  pointerCoordinates: PointerCoordinates,
-  text: string
+function useCanvas(
+  selectionCoordinates: SelectionCoordinates,
+  draw: (
+    context: CanvasRenderingContext2D,
+    [x, y, width, height]: [
+      CanvasParameterType,
+      CanvasParameterType,
+      CanvasParameterType,
+      CanvasParameterType
+    ]
+  ) => void
 ) {
+  log(useCanvas.name);
   const axisScales = computeAxisScales();
-  const { x, y, width, height } = computePath(axisScales, pointerCoordinates);
-
+  const { x, y, width, height } = computePath(axisScales, selectionCoordinates);
   const context = getCanvas2dContext();
+
   context.beginPath();
-  context.rect(x, y, width, height);
-  context.strokeStyle = '#aaaaaa';
-  context.font = '48px sans-serif';
-  context.fillStyle = '#aaaaaa';
-  context.fillText(text, x, y + 48 * axisScales.yScale);
-  context.stroke();
+
+  draw(context, [x, y, width, height]);
+
   context.closePath();
+}
+
+function drawBox(
+  selectionCoordinates: SelectionCoordinates,
+  configureRectangle: (context: CanvasRenderingContext2D) => void
+) {
+  log(drawBox.name);
+  useCanvas(selectionCoordinates, (context, [x, y, width, height]) => {
+    context.rect(x, y, width, height);
+    configureRectangle(context);
+  });
+}
+
+export function drawHighlightBox(selectionCoordinates: SelectionCoordinates) {
+  log(drawHighlightBox.name);
+  drawBox(selectionCoordinates, (context) => {
+    context.lineWidth = strokeWidth;
+    context.strokeStyle = blue;
+    context.stroke();
+
+    context.fillStyle = translucentBlue;
+    context.fill();
+  });
+}
+
+export function drawTagBox(selectionCoordinates: SelectionCoordinates): void {
+  log(drawTagBox.name);
+  drawBox(selectionCoordinates, (context) => {
+    context.strokeStyle = strokeStyle;
+    context.stroke();
+  });
 }
 
 export function drawTagAnnotation(
-  pointerCoordinates: PointerCoordinates,
+  selectionCoordinates: SelectionCoordinates,
   text: string
 ) {
-  const axisScales = computeAxisScales();
-  const { x, y } = computePath(axisScales, pointerCoordinates);
-  const context = getCanvas2dContext();
-  context.strokeStyle = '#aaaaaa';
-  context.font = '48px sans-serif';
-  context.fillStyle = '#aaaaaa';
-  context.fillText(text, x, y + 48 * axisScales.yScale);
-}
+  log(drawTagAnnotation.name);
+  useCanvas(selectionCoordinates, (context, [x, y]) => {
+    context.font = fontStyle;
+    context.fillStyle = fontFillStyle;
+    context.fillText(text, x + gapFromTagBox, y + gapFromTagBox + fontSize);
 
-// TODO:
-export function drawTag(pointerCoordinates: PointerCoordinates, text: string) {
-  drawTagBox(pointerCoordinates, text);
-  // TODO: Prompt for text
-  // TODO: Draw text within tag box
-  // TODO: Add tag to tagged image and save to database
-}
-
-export function setCanvasAbsoluteDimensions(window: Window): void {
-  log(setCanvasAbsoluteDimensions.name);
-  const availHeight = window.screen.availHeight;
-  const availWidth = window.screen.availWidth;
-  const length = availHeight >= availWidth ? availHeight : availWidth;
-
-  canvasElement.height = length;
-  canvasElement.width = length;
-}
-
-export function clearCanvas() {
-  const context = getCanvas2dContext();
-  context.clearRect(0, 0, canvasElement.width, canvasElement.height);
-}
-
-export async function renderCanvas(
-  {
-    computedConditions: { noIndex, noImages },
-    computedData: { currentImageIndex, defaultImageIndex },
-  }: RenderParameters,
-  taggedImages: TaggedImages
-): Promise<void> {
-  if (noImages) {
-    clearCanvas();
-  } else {
-    const image: TaggedImage =
-      taggedImages[noIndex ? defaultImageIndex : currentImageIndex];
-
-    await drawTaggedImage(image);
-  }
+    context.closePath();
+  });
 }

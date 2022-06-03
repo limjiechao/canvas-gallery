@@ -12,7 +12,7 @@ export type Dimension = 'height' | 'width';
 export type Dimensions = Record<Dimension, CanvasParameterType>;
 
 type CanvasParameter = Axis | Dimension;
-type CanvasParameterType = number;
+export type CanvasParameterType = number;
 export type CanvasParameters = Record<CanvasParameter, CanvasParameterType>;
 
 interface TagAnnotation extends Coordinates {
