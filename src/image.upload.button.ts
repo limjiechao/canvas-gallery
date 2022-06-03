@@ -1,5 +1,5 @@
 import { fileInput, imageUploadButton } from './elements';
-import { drawTaggedImage } from './canvas.render';
+import { drawTaggedImage } from './canvas.cache';
 import { createImageFromSource, setSavedImageId } from './utils';
 import { log } from './logging';
 import { renderApp, taggedImageService } from './main';
@@ -47,34 +47,7 @@ async function handleFileInput(event: Event): Promise<void> {
       width,
       height,
     },
-    tags: [
-      {
-        annotation: {
-          text: crypto.randomUUID(),
-          x: 300,
-          y: 400,
-        },
-        box: {
-          width: 500,
-          height: 600,
-          x: 300,
-          y: 400,
-        },
-      },
-      {
-        annotation: {
-          text: crypto.randomUUID(),
-          x: 500,
-          y: 700,
-        },
-        box: {
-          width: 700,
-          height: 800,
-          x: 200,
-          y: 100,
-        },
-      },
-    ],
+    tags: [],
   };
 
   await Promise.all([

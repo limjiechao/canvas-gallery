@@ -15,13 +15,13 @@ type CanvasParameter = Axis | Dimension;
 export type CanvasParameterType = number;
 export type CanvasParameters = Record<CanvasParameter, CanvasParameterType>;
 
-interface TagAnnotation extends Coordinates {
+export interface TagAnnotation extends Coordinates {
   text: string;
 }
 
-type TagBox = CanvasParameters;
+export type TagBox = CanvasParameters;
 
-interface Tag {
+export interface Tag {
   annotation: TagAnnotation;
   box: TagBox;
 }
@@ -30,7 +30,7 @@ interface Image extends CanvasParameters {
   dataUrl: ImageDataUrl;
 }
 
-type Tags = Tag[];
+export type Tags = Tag[];
 
 export interface TaggedImage {
   id: number;

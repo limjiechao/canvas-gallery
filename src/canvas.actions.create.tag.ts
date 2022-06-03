@@ -5,11 +5,11 @@ import {
   drawHighlightBox,
   drawTagAnnotation,
   drawTagBox,
-  redrawImage,
   SelectionCoordinates,
 } from './canvas.render';
 import { delay } from './utils';
-import { clearCanvas } from './canvas.helpers';
+import { updateTagsInTaggedImage } from './tags.helpers';
+import { drawTaggedImageFromCache } from './canvas.cache';
 
 type MouseButtonState = 'up' | 'down';
 
@@ -57,6 +57,7 @@ function handleMouseDown(event: MouseEvent): void {
 async function handleMouseUp(): Promise<void> {
   log(handleMouseUp.name);
 
+  log(mouseButton);
   mouseButton.state = 'up';
 
   // NOTE: Deliberately draw over existing highlight box to indicate to user the selected area is confirmed
@@ -67,16 +68,31 @@ async function handleMouseUp(): Promise<void> {
   const text = window.prompt('Annotate this tag') ?? '';
 
   // NOTE: Redraw from scratch to remove highlight box entirely
-  clearCanvas();
-  redrawImage();
+  drawTaggedImageFromCache();
 
   // NOTE: Do not draw tag image if no annotation was given
   if (!text) return;
 
-  drawTagBox(selection.coordinates);
-  drawTagAnnotation(selection.coordinates, text);
+  const box = drawTagBox(selection.coordinates);
+  const annotation = drawTagAnnotation(selection.coordinates, text);
 
-  // TODO: Save to database
+  // NOTE: Save new tag to database
+  await updateTagsInTaggedImage((tags) => [
+    ...tags,
+    {
+      annotation: {
+        text,
+        x: annotation.x,
+        y: annotation.y,
+      },
+      box: {
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height,
+      },
+    },
+  ]);
 }
 
 function handleMouseMove(event: MouseEvent): void {
@@ -91,8 +107,7 @@ function handleMouseMove(event: MouseEvent): void {
 
   // NOTE: This animates the drawing of the highlight box
   window.requestAnimationFrame(() => {
-    clearCanvas();
-    redrawImage();
+    drawTaggedImageFromCache();
     drawHighlightBox(selection.coordinates);
   });
 }

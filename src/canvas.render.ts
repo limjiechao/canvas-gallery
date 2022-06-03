@@ -1,10 +1,10 @@
 import { log } from './logging';
-import { createImageFromSource } from './utils';
 import {
   CanvasParameters,
   CanvasParameterType,
   Coordinates,
-  DraftTaggedImage,
+  TagAnnotation,
+  TagBox,
   TaggedImage,
   TaggedImages,
 } from './indexed.db';
@@ -17,6 +17,11 @@ import {
   computeTextPlacement,
   getCanvas2dContext,
 } from './canvas.helpers';
+import {
+  drawTaggedImage,
+  resetImageCache,
+  resetTagsCache,
+} from './canvas.cache';
 
 // Rendering entire canvas
 
@@ -29,7 +34,8 @@ export async function renderCanvas(
 ): Promise<void> {
   log(renderCanvas.name);
   if (noImages) {
-    resetImage();
+    resetImageCache();
+    resetTagsCache();
     clearCanvas();
   } else {
     const image: TaggedImage =
@@ -41,72 +47,13 @@ export async function renderCanvas(
 
 // Rendering images
 
-// NOTE: Cache to avoid having to fetch from database in between re-renders while tagging
-const image = {
-  _element: new Image() as HTMLImageElement,
-  _parameters: {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  } as CanvasParameters,
-  get element(): HTMLImageElement {
-    return this._element;
-  },
-  set element(image: HTMLImageElement) {
-    this._element = image;
-  },
-  get parameters(): CanvasParameters {
-    return this._parameters;
-  },
-  set parameters(parameters: CanvasParameters) {
-    this._parameters = parameters;
-  },
-};
-
-function resetImage(): void {
-  image.element = new Image();
-  image.parameters = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  };
-}
-
-function drawImage(
+export function drawImage(
   image: HTMLImageElement,
   { width, height, x, y }: CanvasParameters
 ): void {
   log(drawImage.name);
   const context = getCanvas2dContext();
   context.drawImage(image, x, y, width, height);
-}
-
-export function redrawImage(): void {
-  drawImage(image.element, image.parameters);
-}
-
-export async function drawTaggedImage(
-  taggedImage: TaggedImage | DraftTaggedImage,
-  createdImageElement?: HTMLImageElement
-): Promise<void> {
-  log(drawTaggedImage.name);
-  const {
-    image: { dataUrl, x, y, width, height },
-    tags,
-  } = taggedImage;
-  image.element = await (createdImageElement
-    ? Promise.resolve(createdImageElement)
-    : createImageFromSource(dataUrl));
-  image.parameters = { x, y, width, height };
-
-  drawImage(image.element, image.parameters);
-
-  // TODO: Redraw tags
-  tags.forEach((tag) => {
-    //
-  });
 }
 
 // Rendering tags
@@ -148,14 +95,14 @@ export type PositionalCanvasArguments = [
   height: CanvasParameterType
 ];
 
-function useCanvas(
+function initialDraw(
   selectionCoordinates: SelectionCoordinates,
   draw: (
     context: CanvasRenderingContext2D,
     [x, y, width, height]: PositionalCanvasArguments
   ) => void
-): void {
-  log(useCanvas.name);
+): CanvasParameters {
+  log(initialDraw.name);
   const axisScales = computeAxisScales();
   const { x, y, width, height } = computePath(axisScales, selectionCoordinates);
   const context = getCanvas2dContext();
@@ -165,24 +112,18 @@ function useCanvas(
   draw(context, [x, y, width, height]);
 
   context.closePath();
-}
 
-function drawBox(
-  selectionCoordinates: SelectionCoordinates,
-  configureRectangle: (context: CanvasRenderingContext2D) => void
-): void {
-  log(drawBox.name);
-  useCanvas(selectionCoordinates, (context, [x, y, width, height]) => {
-    context.rect(x, y, width, height);
-    configureRectangle(context);
-  });
+  return { x, y, width, height };
 }
 
 export function drawHighlightBox(
   selectionCoordinates: SelectionCoordinates
 ): void {
   log(drawHighlightBox.name);
-  drawBox(selectionCoordinates, (context) => {
+
+  initialDraw(selectionCoordinates, (context, [x, y, width, height]) => {
+    context.rect(x, y, width, height);
+
     context.lineWidth = strokeWidth;
     context.strokeStyle = blue;
     context.stroke();
@@ -192,32 +133,69 @@ export function drawHighlightBox(
   });
 }
 
-export function drawTagBox(selectionCoordinates: SelectionCoordinates): void {
+export function drawTagBox(
+  selectionCoordinates: SelectionCoordinates
+): CanvasParameters {
   log(drawTagBox.name);
-  drawBox(selectionCoordinates, (context) => {
-    context.strokeStyle = strokeStyle;
-    context.stroke();
+
+  return initialDraw(selectionCoordinates, (context, [x, y, width, height]) => {
+    redrawTagBox(context, { x, y, width, height });
   });
+}
+
+export function redrawTagBox(
+  context: CanvasRenderingContext2D,
+  { x, y, width, height }: TagBox
+): void {
+  log(redrawTagBox.name);
+
+  context.rect(x, y, width, height);
+  context.strokeStyle = strokeStyle;
+  context.stroke();
 }
 
 export function drawTagAnnotation(
   selectionCoordinates: SelectionCoordinates,
   text: string
-): void {
+): Coordinates {
   log(drawTagAnnotation.name);
 
-  useCanvas(selectionCoordinates, (context, positionalCanvasArguments) => {
-    const orientation = computeOrientation(selectionCoordinates);
-    const { x, y } = computeTextPlacement(
-      orientation,
-      positionalCanvasArguments
-    );
+  const { x, y } = initialDraw(
+    selectionCoordinates,
+    (context, positionalCanvasArguments) => {
+      const orientation = computeOrientation(selectionCoordinates);
+      const { x, y } = computeTextPlacement(
+        orientation,
+        positionalCanvasArguments
+      );
 
-    context.font = fontStyle;
-    context.fillStyle = fontFillStyle;
+      redrawTagAnnotation(context, { text, x, y });
+    }
+  );
 
-    context.fillText(text, x + gapFromTagBox, y + gapFromTagBox + fontSize);
+  return { x, y };
+}
 
-    context.closePath();
-  });
+export function redrawTagAnnotation(
+  context: CanvasRenderingContext2D,
+  { text, x, y }: TagAnnotation
+): void {
+  log(redrawTagAnnotation.name);
+
+  context.font = fontStyle;
+  context.fillStyle = fontFillStyle;
+
+  context.fillText(text, x + gapFromTagBox, y + gapFromTagBox + fontSize);
+}
+
+export function drawPath(
+  draw: (context: CanvasRenderingContext2D) => void
+): void {
+  const context = getCanvas2dContext();
+
+  context.beginPath();
+
+  draw(context);
+
+  context.closePath();
 }
