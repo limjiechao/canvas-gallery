@@ -13,7 +13,7 @@ import {
 
 const contextId = '2d' as const;
 
-export function getCanvas2dContext() {
+export function getCanvas2dContext(): CanvasRenderingContext2D {
   log(getCanvas2dContext.name);
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return canvasElement.getContext && canvasElement.getContext(contextId)!;
@@ -166,7 +166,7 @@ export function setCanvasAbsoluteDimensions(window: Window): void {
   canvasElement.width = length;
 }
 
-export function clearCanvas() {
+export function clearCanvas(): void {
   log(clearCanvas.name);
   const context = getCanvas2dContext();
   context.clearRect(0, 0, canvasElement.width, canvasElement.height);

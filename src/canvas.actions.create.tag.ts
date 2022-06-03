@@ -45,15 +45,16 @@ const selection = {
   },
 };
 
-function handleMouseDown(event: MouseEvent) {
+function handleMouseDown(event: MouseEvent): void {
   log(handleMouseDown.name);
 
   mouseButton.state = 'down';
 
+  // NOTE: This provides the start coordinates for highlight box and tag box
   selection.start = { x: event.offsetX, y: event.offsetY };
 }
 
-async function handleMouseUp() {
+async function handleMouseUp(): Promise<void> {
   log(handleMouseUp.name);
 
   mouseButton.state = 'up';
@@ -74,16 +75,21 @@ async function handleMouseUp() {
 
   drawTagBox(selection.coordinates);
   drawTagAnnotation(selection.coordinates, text);
+
+  // TODO: Save to database
 }
 
-function handleMouseMove(event: MouseEvent) {
+function handleMouseMove(event: MouseEvent): void {
   log(handleMouseMove.name);
 
   // NOTE: Stop if mouse button is not pressed and held
   if (mouseButton.isUp) return;
 
+  // NOTE: Keep updating this on mouse move to create highlight box
+  // NOTE: Final update provides end coordinates to draw the tag box
   selection.end = { x: event.offsetX, y: event.offsetY };
 
+  // NOTE: This animates the drawing of the highlight box
   window.requestAnimationFrame(() => {
     clearCanvas();
     redrawImage();
