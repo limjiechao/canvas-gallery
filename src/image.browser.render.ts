@@ -17,7 +17,7 @@ function renderImageId(
 
   if (noImages) {
     imageIdHeading.dataset.currentId = '';
-    imageIdHeading.innerText = 'New Image';
+    imageIdHeading.innerText = 'Upload an image to start';
   } else {
     const currentOrDefaultImageId = noIndex ? defaultImageId : currentImageId;
 

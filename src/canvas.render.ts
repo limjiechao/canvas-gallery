@@ -23,6 +23,7 @@ import {
   resetImageCache,
   resetTagsCache,
 } from './canvas.cache';
+import { canvasElement } from './elements';
 
 // Rendering entire canvas
 
@@ -35,6 +36,7 @@ export async function renderCanvas(
 ): Promise<void> {
   log(renderCanvas.name);
   if (noImages) {
+    canvasElement.classList.add('disabled');
     resetImageCache();
     resetTagsCache();
     clearCanvas();
@@ -42,6 +44,7 @@ export async function renderCanvas(
     const image: TaggedImage =
       taggedImages[noIndex ? defaultImageIndex : currentImageIndex];
 
+    canvasElement.classList.remove('disabled');
     await drawTaggedImage(image);
   }
 }
@@ -59,7 +62,7 @@ export function drawImage(
 
 // Rendering tags
 
-const lightGrey = '#858585';
+const lightGrey = '#777777';
 const blue = '#0099ff';
 const translucentBlue = `${blue}22`;
 
@@ -67,7 +70,7 @@ const strokeStyle = lightGrey;
 const strokeWidth = 2;
 
 const fontSize = 24;
-const fontStyle = `${fontSize}px sans-serif`;
+const fontStyle = `bold ${fontSize}px sans-serif`;
 const fontFillStyle = lightGrey;
 
 const gapFromTagBox = 8;

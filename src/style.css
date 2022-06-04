@@ -16,6 +16,11 @@
   background-color: white;
 }
 
+#canvas.disabled {
+  pointer-events: none;
+  background-color: darkgray;
+}
+
 #unsupported-screen-size-section {
   display: none;
   width: 100%;
@@ -83,6 +88,7 @@ body {
   #image-section {
     width: 50%;
   }
+
   #tag-section {
     width: 50%;
   }
@@ -105,6 +111,7 @@ body {
   #image-section {
     width: 100%;
   }
+
   #tag-section {
     width: 100%;
   }
