@@ -82,6 +82,7 @@ async function handleMouseUp(): Promise<void> {
 
   // NOTE: Save new tag to database and re-render
   await updateTagsInTaggedImage((tags) => {
+    // NOTE: If `reply` is empty string, create a default tag annotation
     const text = reply ? reply : createNextDefaultTagAnnotation(tags);
 
     const box = drawTagBox(selection.coordinates);

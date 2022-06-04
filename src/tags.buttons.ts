@@ -1,6 +1,9 @@
 import { tagsClearButton } from './elements';
 import { log } from './logging';
-import { updateTagsInTaggedImage } from './tags.helpers';
+import {
+  createNextDefaultTagAnnotation,
+  updateTagsInTaggedImage,
+} from './tags.helpers';
 import { delay } from './utils';
 
 export async function handleClickDeleteTagButton(event: Event): Promise<void> {
@@ -25,15 +28,21 @@ export async function handleClickTag(event: Event) {
 
   // NOTE: Deliberate delay
   await delay(250);
-
-  const reply = window.prompt('Edit annotation', oldText) ?? '';
-  const text = reply ? reply : oldText;
+  const replyOrNoReply = window.prompt('Edit annotation', oldText);
 
   // NOTE: If no change in annotation text, stop here to save a database round trip and re-render
-  if (text === oldText) return;
+  if (replyOrNoReply === oldText) return;
+  // NOTE: If user presses "Cancel", stop here to save a database round trip and re-render
+  if (Object.is(replyOrNoReply, null)) return;
 
-  await updateTagsInTaggedImage((tags) =>
-    tags.map((tag, index) =>
+  // NOTE: We can safely cast it as string at this point
+  const reply = replyOrNoReply as string;
+
+  await updateTagsInTaggedImage((tags) => {
+    // NOTE: If `reply` is empty string, create a default tag annotation
+    const text = reply ? reply : createNextDefaultTagAnnotation(tags);
+
+    return tags.map((tag, index) =>
       index === tagIndex
         ? {
             ...tag,
@@ -43,8 +52,8 @@ export async function handleClickTag(event: Event) {
             },
           }
         : tag
-    )
-  );
+    );
+  });
 }
 
 export async function handleClickClearTagsButton() {
