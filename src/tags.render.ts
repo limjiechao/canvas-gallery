@@ -1,15 +1,22 @@
 import { RenderParameters } from './main';
-import { TaggedImage, TaggedImages } from './indexed.db';
+import { TagAnnotation, TaggedImages } from './indexed.db';
 import { tagsElement, tagTemplate } from './elements';
-import { handleClickDeleteTagButton } from './tags.buttons';
+import { handleClickDeleteTagButton, handleClickTag } from './tags.buttons';
 import { log } from './logging';
 
 function cloneTagTemplate() {
-  return tagTemplate.content && tagTemplate.content.cloneNode(true);
+  // NOTE: Get the element out of the `documentFragment` before cloning for use
+  const documentFragment: DocumentFragment = tagTemplate.content;
+  const tagElement: HTMLDivElement =
+    documentFragment.firstElementChild as HTMLDivElement;
+
+  return tagElement.cloneNode(true);
 }
 
-function cloneAndPopulateTagElement(
-  { annotation }: TaggedImage['tags'][number],
+export type TextOnlyTagAnnotation = { annotation: Pick<TagAnnotation, 'text'> };
+
+export function cloneAndPopulateTagElement(
+  { annotation: { text } }: TextOnlyTagAnnotation,
   index: number
 ) {
   const tagElement = cloneTagTemplate() as HTMLDivElement;
@@ -18,7 +25,8 @@ function cloneAndPopulateTagElement(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     tagElement.querySelector<HTMLDivElement>('.annotation')!;
   annotationElement.dataset.index = `${index}`;
-  annotationElement.innerText = annotation.text;
+  annotationElement.innerText = text;
+  annotationElement.addEventListener('click', handleClickTag);
 
   const deleteTagButton =
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

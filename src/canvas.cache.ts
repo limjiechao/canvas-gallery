@@ -18,7 +18,7 @@ import { clearCanvas } from './canvas.helpers';
  * NOTE: Cache to avoid having to fetch from database in between re-renders while tagging
  * NOTE: All direct cache mutations in the app happen only in this file for sanity's sake
  */
-export const imageCache = {
+const imageCache = {
   _element: new Image() as HTMLImageElement,
   _parameters: {
     x: 0,
@@ -40,7 +40,7 @@ export const imageCache = {
   },
 };
 
-export const tagsCache = {
+const tagsCache = {
   _tags: [] as Tags,
   get list(): Tags {
     return this._tags;

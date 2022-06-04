@@ -7,6 +7,7 @@
 }
 
 #canvas {
+  cursor: crosshair;
   aspect-ratio: 1 / 1;
   height: 100%;
   width: 100%;
@@ -147,10 +148,22 @@ h1 {
 
 .annotation {
   display: block;
-  max-width: 80%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 0.375rem 0.375rem;
+  min-width: 80%;
+  text-align: left;
+  /*white-space: nowrap;*/
+  /*overflow: hidden;*/
+  /*text-overflow: ellipsis;*/
+}
+
+.annotation:hover {
+  cursor: text;
+  overflow: auto;
+  white-space: unset;
+  outline: 1px cornflowerblue solid;
+  border-radius: 0.25rem;
+  background-color: aliceblue;
+  padding: 0.375rem;
 }
 
 .primary-button {
@@ -171,14 +184,14 @@ h1 {
 }
 
 .text-button:enabled:hover {
-  color: navy;
+  color: midnightblue;
 }
 
 .text-button:enabled:active {
-  color: mediumblue;
+  color: cornflowerblue;
 }
 
 /* NOTE: Hide actual file input because it seems impossible to restyle */
-input[type='file'] {
+#file-input {
   display: none;
 }

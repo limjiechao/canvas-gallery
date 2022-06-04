@@ -8,7 +8,10 @@ import {
   SelectionCoordinates,
 } from './canvas.render';
 import { delay } from './utils';
-import { updateTagsInTaggedImage } from './tags.helpers';
+import {
+  createNextDefaultTagAnnotation,
+  updateTagsInTaggedImage,
+} from './tags.helpers';
 import { drawTaggedImageFromCache } from './canvas.cache';
 
 type MouseButtonState = 'up' | 'down';
@@ -64,34 +67,43 @@ async function handleMouseUp(): Promise<void> {
 
   // NOTE: Deliberate delay before showing prompt for user to inspect what was just selected
   await delay(500);
-  const text = window.prompt('Annotate this tag') ?? '';
+  const replyOrNoReply = window.prompt(
+    'Annotate this tag (you may leave it empty)'
+  );
 
   // NOTE: Redraw from scratch to remove highlight box entirely
   drawTaggedImageFromCache();
 
-  // NOTE: Do not draw tag image if no annotation was given
-  if (!text) return;
+  // NOTE: Do not draw tag image if user pressed "Cancel"
+  if (Object.is(replyOrNoReply, null)) return;
 
-  const box = drawTagBox(selection.coordinates);
-  const annotation = drawTagAnnotation(selection.coordinates, text);
+  // NOTE: We can safely cast it as string at this point
+  const reply = replyOrNoReply as string;
 
-  // NOTE: Save new tag to database
-  await updateTagsInTaggedImage((tags) => [
-    ...tags,
-    {
-      annotation: {
-        text,
-        x: annotation.x,
-        y: annotation.y,
+  // NOTE: Save new tag to database and re-render
+  await updateTagsInTaggedImage((tags) => {
+    const text = reply ? reply : createNextDefaultTagAnnotation(tags);
+
+    const box = drawTagBox(selection.coordinates);
+    const annotation = drawTagAnnotation(selection.coordinates, text);
+
+    return [
+      ...tags,
+      {
+        annotation: {
+          text,
+          x: annotation.x,
+          y: annotation.y,
+        },
+        box: {
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+        },
       },
-      box: {
-        x: box.x,
-        y: box.y,
-        width: box.width,
-        height: box.height,
-      },
-    },
-  ]);
+    ];
+  });
 }
 
 function handleMouseMove(event: MouseEvent): void {
