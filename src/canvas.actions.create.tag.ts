@@ -1,69 +1,63 @@
-import { Coordinates } from './indexed.db';
 import { log } from './logging';
 import { canvasElement } from './elements';
 import {
   drawHighlightBox,
   drawTagAnnotation,
   drawTagBox,
-  SelectionCoordinates,
 } from './canvas.render';
 import { delay } from './utils';
 import {
   createNextDefaultTagAnnotation,
   updateTagsInTaggedImage,
 } from './tags.helpers';
-import { drawTaggedImageFromCache } from './canvas.cache';
-
-type MouseButtonState = 'up' | 'down';
-
-const mouseButton = {
-  _state: 'up' as MouseButtonState,
-  get isDown(): boolean {
-    return this._state === 'down';
-  },
-  get isUp(): boolean {
-    return this._state === 'up';
-  },
-  set state(upOrDown: MouseButtonState) {
-    this._state = upOrDown;
-  },
-};
-
-const selection = {
-  _start: { x: 0, y: 0 } as Coordinates,
-  _end: { x: 0, y: 0 } as Coordinates,
-  set start({ x, y }: Coordinates) {
-    this._start.x = x;
-    this._start.y = y;
-  },
-  set end({ x, y }: Coordinates) {
-    this._end.x = x;
-    this._end.y = y;
-  },
-  get coordinates(): SelectionCoordinates {
-    return {
-      start: this._start,
-      end: this._end,
-    };
-  },
-};
+import { drawTaggedImageFromCache } from './canvas.render.cache';
+import {
+  mouseButtonIsUp,
+  mouseMouseDurationExceedsRejectionThreshold,
+  resetMouseMoveTracking,
+  resetSelectionTracking,
+  selectionCoordinates,
+  selectionDeltaExceedsRejectionThreshold,
+  updateMouseButtonIsDown,
+  updateMouseButtonIsUp,
+  updateMouseMoveHasBegun,
+  updateMouseMoveHasStopped,
+  updateSelectionEnd,
+  updateSelectionStart,
+} from './canvas.actions.cache';
 
 function handleMouseDown(event: MouseEvent): void {
   log(handleMouseDown.name);
 
-  mouseButton.state = 'down';
+  updateMouseButtonIsDown();
 
   // NOTE: This provides the start coordinates for highlight box and tag box
-  selection.start = { x: event.offsetX, y: event.offsetY };
+  updateSelectionStart(event);
 }
 
-async function handleMouseUp(): Promise<void> {
+async function handleMouseUp(event: MouseEvent): Promise<void> {
   log(handleMouseUp.name);
 
-  mouseButton.state = 'up';
+  updateMouseButtonIsUp();
+  updateMouseMoveHasStopped();
+
+  if (
+    !mouseMouseDurationExceedsRejectionThreshold() ||
+    !selectionDeltaExceedsRejectionThreshold()
+  ) {
+    drawTaggedImageFromCache();
+    resetSelectionTracking();
+    resetMouseMoveTracking();
+    return;
+  }
+
+  resetMouseMoveTracking();
+
+  // NOTE: This provides the end coordinates for highlight box and tag box
+  updateSelectionEnd(event);
 
   // NOTE: Deliberately draw over existing highlight box to indicate to user the selected area is confirmed
-  drawHighlightBox(selection.coordinates);
+  drawHighlightBox(selectionCoordinates());
 
   // NOTE: Deliberate delay before showing prompt for user to inspect what was just selected
   await delay(500);
@@ -85,8 +79,8 @@ async function handleMouseUp(): Promise<void> {
     // NOTE: If `reply` is empty string, create a default tag annotation
     const text = reply ? reply : createNextDefaultTagAnnotation(tags);
 
-    const box = drawTagBox(selection.coordinates);
-    const annotation = drawTagAnnotation(selection.coordinates, text);
+    const box = drawTagBox(selectionCoordinates());
+    const annotation = drawTagAnnotation(selectionCoordinates(), text);
 
     return [
       ...tags,
@@ -105,22 +99,27 @@ async function handleMouseUp(): Promise<void> {
       },
     ];
   });
+
+  // NOTE: reset selection coordinate
+  resetSelectionTracking();
 }
 
 function handleMouseMove(event: MouseEvent): void {
   log(handleMouseMove.name);
 
   // NOTE: Stop if mouse button is not pressed and held
-  if (mouseButton.isUp) return;
+  if (mouseButtonIsUp()) return;
+
+  updateMouseMoveHasBegun();
 
   // NOTE: Keep updating this on mouse move to create highlight box
   // NOTE: Final update provides end coordinates to draw the tag box
-  selection.end = { x: event.offsetX, y: event.offsetY };
+  updateSelectionEnd(event);
 
   // NOTE: This animates the drawing of the highlight box
   window.requestAnimationFrame(() => {
     drawTaggedImageFromCache();
-    drawHighlightBox(selection.coordinates);
+    drawHighlightBox(selectionCoordinates());
   });
 }
 
