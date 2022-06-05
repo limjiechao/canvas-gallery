@@ -51,9 +51,7 @@ function renderBackNextAndDeleteButtons({
   log(renderBackNextAndDeleteButtons.name);
 
   imageBackButton.disabled = noImages || noPreviousImageId;
-  imageBackButton.style.opacity = noImages || noPreviousImageId ? '0.5' : '1';
   imageNextButton.disabled = noImages || noNextImageId;
-  imageNextButton.style.opacity = noImages || noNextImageId ? '0.5' : '1';
 
   imageDeleteButton.disabled = noImages;
 }
