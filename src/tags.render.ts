@@ -1,6 +1,6 @@
 import { RenderParameters } from './main';
 import { TagAnnotation, TaggedImages } from './indexed.db';
-import { tagsElement, tagTemplate } from './elements';
+import { tagsClearButton, tagsElement, tagTemplate } from './elements';
 import { handleClickDeleteTagButton, handleClickTag } from './tags.buttons';
 import { log } from './logging';
 
@@ -38,24 +38,29 @@ export function cloneAndPopulateTagElement(
 
 export async function renderTags(
   {
-    computedConditions: { noIndex },
+    computedConditions: { noIndex, noImages },
     computedData: { currentImageIndex, defaultImageIndex },
   }: RenderParameters,
   taggedImages: TaggedImages
 ): Promise<void> {
   log(renderTags.name);
 
-  tagsElement.replaceChildren();
+  if (noImages) {
+    tagsClearButton.disabled = true;
+  } else {
+    tagsClearButton.disabled = false;
+    tagsElement.replaceChildren();
 
-  const currentOrDefaultImageId = noIndex
-    ? defaultImageIndex
-    : currentImageIndex;
-  const taggedImage = taggedImages[currentOrDefaultImageId];
+    const currentOrDefaultImageId = noIndex
+      ? defaultImageIndex
+      : currentImageIndex;
+    const taggedImage = taggedImages[currentOrDefaultImageId];
 
-  if (!taggedImage) return;
+    if (!taggedImage) return;
 
-  const { tags } = taggedImage;
+    const { tags } = taggedImage;
 
-  const tagElements = tags.map(cloneAndPopulateTagElement);
-  tagsElement.append(...tagElements);
+    const tagElements = tags.map(cloneAndPopulateTagElement);
+    tagsElement.append(...tagElements);
+  }
 }
