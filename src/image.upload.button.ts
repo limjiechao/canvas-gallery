@@ -1,5 +1,5 @@
 import { fileInput, imageUploadButton } from './elements';
-import { drawTaggedImage } from './canvas.cache';
+import { drawTaggedImage } from './canvas.render.cache';
 import { createImageFromSource, setSavedImageId } from './utils';
 import { log } from './logging';
 import { renderApp, taggedImageService } from './main';

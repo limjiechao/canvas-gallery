@@ -22,7 +22,7 @@ import {
   drawTaggedImage,
   resetImageCache,
   resetTagsCache,
-} from './canvas.cache';
+} from './canvas.render.cache';
 import { canvasElement } from './elements';
 
 // Rendering entire canvas

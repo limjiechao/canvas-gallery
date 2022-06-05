@@ -200,7 +200,7 @@ Every time a new image is deleted or loaded, this local storage item is updated.
 
 Only the current image and its tags are cached to avoid any round trip to the database and allow fast redrawing of the canvas during user interaction.
 
-The `imageCache` and `tagsCache` are JavaScript objects with getters and setters to facilitate mutations. All direct mutations happen within `canvas.cache.ts`. All other JavaScript modules can only indirect mutate the caches via functions exposed by `canvas.cache.ts`.
+The `imageCache` and `tagsCache` are JavaScript objects with getters and setters to facilitate mutations. All direct mutations happen within `canvas.render.cache.ts`. All other JavaScript modules can only indirect mutate the caches via functions exposed by `canvas.render.cache.ts`.
 
 # Canvas responsiveness
 

@@ -1,7 +1,7 @@
 import { imageIdHeading } from './elements';
 import { renderApp, taggedImageService } from './main';
 import { Tags } from './indexed.db';
-import { setTagsCache } from './canvas.cache';
+import { setTagsCache } from './canvas.render.cache';
 
 const untitledTag = 'Untitled tag';
 const untitledTagRegex = /Untitled tag (?<number>\d+)/;
