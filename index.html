@@ -7,55 +7,61 @@
   <title>Canvas Gallery</title>
 </head>
 <body>
-<div id="canvas-container">
-  <canvas id="canvas">
-    Canvas is not supported by your browser
-  </canvas>
+<div id="unsupported-touch-device" class="hidden">
+  <h1 id="unsupported-touch-device-message">Touch device is not supported</h1>
 </div>
 
-<aside id="interface">
-  <div id="image-section">
-    <h1 id="image-id"></h1>
+<main>
+  <div id="canvas-container">
+    <canvas id="canvas">
+      Canvas is not supported by your browser
+    </canvas>
+  </div>
 
-    <div id="image-browser">
-      <button id="image-back-button" class="text-button" type="button">Back</button>
+  <aside id="interface">
+    <div id="image-section">
+      <h1 id="image-id"></h1>
 
-      <span id="image-pagination">No images</span>
+      <div id="image-browser">
+        <button id="image-back-button" class="text-button" type="button">Back</button>
 
-      <button id="image-next-button" class="text-button" type="button">Next</button>
+        <span id="image-pagination">No images</span>
+
+        <button id="image-next-button" class="text-button" type="button">Next</button>
+      </div>
+
+      <button id="image-delete-button" class="delete-button primary-button" type="button">
+        Delete Image
+      </button>
+
+      <button id="image-upload-button" class="primary-button" type="button">
+        Upload New Image
+      </button>
     </div>
 
-    <button id="image-delete-button" class="delete-button primary-button" type="button">
-      Delete Image
-    </button>
+    <div id="tag-section">
+      <h1 class="tag-title">Tags</h1>
 
-    <button id="image-upload-button" class="primary-button" type="button">
-      Upload New Image
-    </button>
+      <div id="tags"></div>
+
+      <button id="tags-clear-button" type="button" class="primary-button">Clear All Tags</button>
+    </div>
+  </aside>
+
+  <div id="unsupported-screen-size-section">
+    <h1 id="unsupported-screen-size-message">Screen size below 375px width is not supported</h1>
   </div>
 
-  <div id="tag-section">
-    <h1 class="tag-title">Tags</h1>
+  <input type="file" id="file-input" name="upload-file" accept="image/png, image/jpeg, image/gif">
 
-    <div id="tags"></div>
+  <template id="tag-template">
+    <div class="tag">
+      <div class="annotation"></div>
 
-    <button id="tags-clear-button" type="button" class="primary-button">Clear All Tags</button>
-  </div>
-</aside>
-
-<div id="unsupported-screen-size-section">
-  <h1 id="unsupported-screen-size-message">Screen size below 375px width is not supported</h1>
-</div>
-
-<input type="file" id="file-input" name="upload-file" accept="image/png, image/jpeg, image/gif">
-
-<template id="tag-template">
-  <div class="tag">
-    <div class="annotation"></div>
-
-    <button class="delete-button text-button" type="button">Delete</button>
-  </div>
-</template>
+      <button class="delete-button text-button" type="button">Delete</button>
+    </div>
+  </template>
+</main>
 
 <script type="module" src="/src/main.ts"></script>
 </body>

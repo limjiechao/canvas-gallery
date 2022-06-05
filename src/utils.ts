@@ -1,7 +1,27 @@
 import { log } from './logging';
 import { TaggedImage } from './indexed.db';
+import { mainElement, touchDeviceNotSupportedElement } from './elements';
 
 // General helper functions
+
+function isTouchDevice(): boolean {
+  return (
+    'ontouchstart' in window ||
+    window.matchMedia('(pointer: coarse)').matches ||
+    navigator.maxTouchPoints > 0 ||
+    navigator.msMaxTouchPoints > 0
+  );
+}
+
+export function displayUnsupportedMessageIfTouchScreenAndThrowError(): void {
+  if (isTouchDevice()) {
+    mainElement.classList.add('hidden');
+    touchDeviceNotSupportedElement.classList.remove('hidden');
+
+    throw new Error('Touch device is not supported');
+  }
+}
+
 type Milliseconds = number;
 
 export async function delay(duration: Milliseconds): Promise<void> {

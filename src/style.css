@@ -44,6 +44,20 @@
   height: 100%;
 }
 
+#unsupported-touch-device {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#unsupported-touch-device.hidden {
+  display: none;
+}
+
+#unsupported-screen-size-message {
+  margin: 1rem;
+}
+
 html {
   height: 100vh;
   display: flex;
@@ -51,14 +65,22 @@ html {
 }
 
 body {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: center;
   margin: 0;
   max-height: 100vh;
   min-width: var(--min-width);
   background-color: var(--app-background-color);
+}
+
+body,
+main {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
+
+main.hidden {
+  display: none;
 }
 
 #canvas-container {
@@ -72,11 +94,13 @@ body {
 
 @media (max-width: 768px) {
   html,
-  body {
+  body,
+  main {
     height: 100%;
   }
 
-  body {
+  body,
+  main {
     flex-direction: column;
     align-items: center;
   }
@@ -112,7 +136,8 @@ body {
 }
 
 @media (max-width: 512px) {
-  body {
+  body,
+  main {
     flex-direction: column;
     align-items: center;
   }
@@ -135,7 +160,8 @@ body {
 }
 
 @media (max-width: 374px) {
-  body {
+  body,
+  main {
     min-width: unset;
   }
 

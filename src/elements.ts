@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+export const mainElement = document.querySelector<HTMLElement>('main')!;
+
+export const touchDeviceNotSupportedElement =
+  document.querySelector<HTMLDivElement>('#unsupported-touch-device')!;
 
 export const canvasElement =
   document.querySelector<HTMLCanvasElement>('#canvas')!;

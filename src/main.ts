@@ -6,16 +6,23 @@ import { addCanvasRelatedEventListeners } from './canvas.actions.create.tag';
 import { TaggedImages, TaggedImageService } from './indexed.db';
 import { renderImageBrowser } from './image.browser.render';
 import { addOtherImageButtonEventListeners } from './image.other.buttons';
-import { getSavedTaggedImageId } from './utils';
+import {
+  displayUnsupportedMessageIfTouchScreenAndThrowError,
+  getSavedTaggedImageId,
+  isTouchDevice,
+} from './utils';
 import { addTagSectionButtonEventListeners } from './tags.buttons';
 import { renderTags } from './tags.render';
 import { setCanvasAbsoluteDimensions } from './canvas.helpers';
+import { mainElement, touchDeviceNotSupportedElement } from './elements';
 
 export const taggedImageService = new TaggedImageService();
 export const taggedImages: TaggedImages = [];
 
 async function handleReadyStateChange() {
   log(handleReadyStateChange.name);
+
+  displayUnsupportedMessageIfTouchScreenAndThrowError();
 
   setCanvasAbsoluteDimensions(window);
 
