@@ -157,12 +157,9 @@ h1 {
 
 .annotation {
   display: block;
-  padding: 0.375rem 0.375rem;
+  padding: 0.375rem;
   min-width: 80%;
   text-align: left;
-  /*white-space: nowrap;*/
-  /*overflow: hidden;*/
-  /*text-overflow: ellipsis;*/
 }
 
 .annotation:hover {
@@ -179,10 +176,8 @@ h1 {
   margin: 0.5rem 0 0 0;
 }
 
-.primary-button:hover {
-}
-
-.primary-button:active {
+.primary-button:disabled {
+  opacity: 0.5;
 }
 
 .text-button {
