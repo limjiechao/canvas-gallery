@@ -6,7 +6,7 @@
 
 App is conceived of as having 3 interactive parts:
 
-- Canvas element
+- Canvas element,
 - Image browser section
 - Tags section
 
@@ -16,12 +16,15 @@ Each part consists of separate modules:
 - `*.helpers.ts` helper functions to handle second-order computations
 - all other files handle the major user flows
 
-Canvas element has a `*.cache.ts`  to keep the current image and tags at hand.
+Canvas element also has two `*.cache.ts` for:
+
+- current image and tags at hand
+- tracking mouse events and selection coordinates
 
 ### `main.ts`
 
 - Initialization
-- Centralized app rendering logic
+- Centralized app rendering logic.
 
 ### `elements.ts`
 
@@ -29,16 +32,16 @@ HTML elements assigned to constants guaranteed to be available for use by the ap
 
 ### `index.db.ts`
 
-IndexDB service for
+IndexDB service for:
 
-- first-time and subsequent initializations
+- first-time and subsequent initializations, and
 - CRUD for `taggedImages` store
 
 ## Functional programming
 
 Not every function is pure in the strictest sense of absolutely no side effects. The following concerns by necessity requires mutation:
 
-- canvas cache,
+- canvas caches,
 - selection coordinates tracking
 - DOM manipulation, and
 - drawing of canvas
@@ -61,8 +64,9 @@ Computed data and conditions are crunched in a centralized `computeRenderParamet
 
 ## Initialization
 
+- If touch device detected, show unsupported message and throw error
 - Set canvas absolute dimensions
-- Add event listeners
+- Add event listeners for
     - Image Section
         - “Upload New Image” button
         - “Delete Image” button
@@ -196,21 +200,35 @@ This is used to save the ID of the last loaded image so it can be restored when 
 
 Every time a new image is deleted or loaded, this local storage item is updated.
 
-## Caches for fast canvas redraws
+## Caches
 
-Only the current image and its tags are cached to avoid any round trip to the database and allow fast redrawing of the canvas during user interaction.
+### Facilitate fast canvas redraws
 
-The `imageCache` and `tagsCache` are JavaScript objects with getters and setters to facilitate mutations. All direct mutations happen within `canvas.render.cache.ts`. All other JavaScript modules can only indirect mutate the caches via functions exposed by `canvas.render.cache.ts`.
+The current image and its tags are cached to avoid any round trip to the database and allow fast redrawing of the canvas during user interaction.
+
+### Track mouse events and selection coordinates
+
+Tracking across `mouseup`, `mousemove` and `mouseup` events to track:
+
+- if mouse button is down or up,
+- duration of mouse movement when mouse button is down, and
+- start and end coordinates of the dragging
+
+These facilitate the drawing of the timely and accurate selection box and tag box and rejection of accidental clicking and dragging.
+
+### Direct mutations only within `canvas.render.cache.ts` and `canvas.actions.cache.ts`
+
+Each cache is a JavaScript object with getters and setters to facilitate mutations. All direct mutations happen within `canvas.render.cache.ts`. All other JavaScript modules can only indirectly mutate the caches via exported functions.
 
 # Canvas responsiveness
 
-- Canvas size is set to the higher of `window.clientHeight` or `window.clientWidth`.
+- Canvas size is set to the higher of `window.screen.availHeight` or `window.screen.availWidth`
 - Several breakpoints to maximize canvas size at all resolutions:
     - `768px`
     - `640px`
     - `512px`
-- Interface arrangement goes from side-by-side to top-bottom as screen width shrinks.
-- If screen width falls below `375 px` width, app would show “screen size not supported” message.
+- Interface arrangement goes from side-by-side to top-bottom as screen width shrinks
+- If screen width falls below `375 px` width, app would show “screen size not supported” message
 
 # UX Considerations
 
@@ -222,10 +240,10 @@ When hovering over existing tags, pointer changes to **text** cursor and the tag
 
 ## When no image is loaded
 
-- Canvas disabled from tagging and turns to darker grey.
-- Image back and next button disabled.
+- Canvas disabled from tagging and turns to darker grey
+- Image back and next button disabled
 - Clear all tags button disabled
-- User is hinted to upload new image with the placeholder title “Upload image to start” and “No image” in the image browser.
+- User is hinted to upload new image with the placeholder title “Upload image to start” and “No image” in the image browser
 
 ## When first image is loaded
 
@@ -233,9 +251,15 @@ The image automatically resizes to fit and is centered on the canvas.
 
 ## When drawing a new tag box
 
-- As user clicks and drags, a blue translucent selection box is drawn.
-- Once user releases the click, blue translucent box darkens to confirm selection.
-- After a deliberate delay of 500ms to let user inspect what was selected, a browser prompt pops up for user to input the annotation.
+- As user clicks and drags, a blue translucent selection box is drawn
+- Once user releases the click, blue translucent box darkens to confirm selection
+- After a deliberate delay of 500ms to let user inspect what was selected, a browser prompt pops up for user to input the annotation
+
+### Threshold for selection rejection
+
+If selection box is smaller than 20px by 20px or dragging lasts shorter than 250 milliseconds, the selection will be rejected.
+
+This guard imposed to avoid accidental clicking and dragging from creating unwanted tags, reducing annoyances. 
 
 ## When entering new tag annotation
 
@@ -247,17 +271,17 @@ The image automatically resizes to fit and is centered on the canvas.
 
 #### If input is empty string
 
-- An automatically incremented default “Untitled Tag Number X” annotation is given.
+- An automatically incremented default “Untitled Tag Number X” annotation is given
 
 #### If input is populated string
 
-- Tag box is annotated with user input.
+- Tag box is annotated with user input
 
 ## When editing existing tag
 
 ### User presses Cancel
 
-- Reverts to old text.
+- Reverts to old text
 
 ### User presses Okay
 
@@ -274,8 +298,8 @@ The image automatically resizes to fit and is centered on the canvas.
 
 ## When deleting image
 
-- If no saved image left, app disabled canvas from tagging.
+- If no saved image left, app disabled canvas from tagging
 - If was last saved image, app switches to image before
 - If was first saved image, app switches to second image
-- Otherwise, app simply switches to the image before.
+- Otherwise, app simply switches to the image before
 
