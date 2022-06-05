@@ -53,9 +53,11 @@ export function resizeImageToFitCanvas(image: HTMLImageElement): Dimensions {
     Object.entries(imageToCanvasDimensionRatio) as [Dimension, number][]
   ).sort(
     (
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       [previousDimension, previousRatio],
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       [currentDimension, currentRatio]
     ) => {
       if (currentRatio > previousRatio) {

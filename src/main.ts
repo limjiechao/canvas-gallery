@@ -9,12 +9,10 @@ import { addOtherImageButtonEventListeners } from './image.other.buttons';
 import {
   displayUnsupportedMessageIfTouchScreenAndThrowError,
   getSavedTaggedImageId,
-  isTouchDevice,
 } from './utils';
 import { addTagSectionButtonEventListeners } from './tags.buttons';
 import { renderTags } from './tags.render';
 import { setCanvasAbsoluteDimensions } from './canvas.helpers';
-import { mainElement, touchDeviceNotSupportedElement } from './elements';
 
 export const taggedImageService = new TaggedImageService();
 export const taggedImages: TaggedImages = [];
