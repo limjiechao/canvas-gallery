@@ -45,11 +45,12 @@ export async function renderTags(
 ): Promise<void> {
   log(renderTags.name);
 
+  tagsElement.replaceChildren();
+
   if (noImages) {
     tagsClearButton.disabled = true;
   } else {
     tagsClearButton.disabled = false;
-    tagsElement.replaceChildren();
 
     const currentOrDefaultImageId = noIndex
       ? defaultImageIndex

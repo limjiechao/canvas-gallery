@@ -13,9 +13,10 @@ async function handleClickDeleteImageButton(): Promise<void> {
   log(handleClickDeleteImageButton.name);
 
   const currentId = Number(imageIdHeading.dataset.currentId);
-
   await taggedImageService.deleteOne(currentId);
+
   setNewCurrentImageId();
+
   await renderApp();
 }
 
