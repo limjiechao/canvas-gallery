@@ -36,6 +36,18 @@ export function resizeImageToFitCanvas(image: HTMLImageElement): Dimensions {
     width: image.width / canvasElement.width,
   };
 
+  const imageIsSmallerThanCanvas =
+    imageToCanvasDimensionRatio.height < 1 &&
+    imageToCanvasDimensionRatio.width < 1;
+
+  // NOTE: Only resize images that are bigger than canvas
+  if (imageIsSmallerThanCanvas) {
+    return {
+      width: image.width,
+      height: image.height,
+    };
+  }
+
   // Determine bigger dimension by comparing image to canvas
   const [[biggerDimension, biggerRatio], [smallerDimension]] = (
     Object.entries(imageToCanvasDimensionRatio) as [Dimension, number][]
