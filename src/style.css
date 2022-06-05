@@ -7,6 +7,8 @@
 }
 
 #canvas {
+  /* NOTE: This prevents text in other parts of the page from getting selected when user inadvertently double clicks */
+  user-select: none;
   cursor: crosshair;
   aspect-ratio: 1 / 1;
   height: 100%;
