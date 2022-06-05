@@ -17,7 +17,7 @@ function renderImageId(
 
   if (noImages) {
     imageIdHeading.dataset.currentId = '';
-    imageIdHeading.innerText = 'Upload an image to start';
+    imageIdHeading.innerText = 'Upload An Image To Start';
   } else {
     const currentOrDefaultImageId = noIndex ? defaultImageId : currentImageId;
 
@@ -37,7 +37,7 @@ function renderImagePagination(
   log(renderImagePagination.name);
 
   imagePaginationSpan.innerText = noImages
-    ? `No images`
+    ? 'No Images'
     : `${
         (noIndex ? defaultImageIndex : currentImageIndex) + 1
       } of ${imageCount}`;
