@@ -5,14 +5,25 @@ import { mainElement, touchDeviceNotSupportedElement } from './elements';
 // General helper functions
 
 function isTouchDevice(): boolean {
-  return (
-    'ontouchstart' in window ||
-    window.matchMedia('(pointer: coarse)').matches ||
-    navigator.maxTouchPoints > 0 ||
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    navigator.msMaxTouchPoints > 0
-  );
+  const matchesPointingDevice = window.matchMedia(
+    '(any-pointer: fine)'
+  ).matches;
+  const matchesTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+  if (matchesPointingDevice) {
+    // NOTE: This is for devices like iPad which could have a keyboard with trackpad
+    return false;
+  } else {
+    // NOTE: Otherwise, just assume that if it is touch device, it does not have a mouse
+    return (
+      matchesTouchDevice ||
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      navigator.msMaxTouchPoints > 0
+    );
+  }
 }
 
 export function displayUnsupportedMessageIfTouchScreenAndThrowError(): void {

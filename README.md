@@ -39,32 +39,40 @@ IndexDB service for:
 
 ## Functional programming
 
-Not every function is pure in the strictest sense of absolutely no side effects. The following concerns by necessity requires mutation:
+Not every function is pure in the strictest sense of absolutely no side effects. The following concerns by necessity
+requires mutation:
 
 - canvas caches,
 - selection coordinates tracking
 - DOM manipulation, and
 - drawing of canvas
 
-But for everything and everywhere else, *not a single variable in the app is mutated*. Instead, generous creation of one-off temporary local variables and data transformations via non-mutative array methods.
+But for everything and everywhere else, *not a single variable in the app is mutated*. Instead, generous creation of
+one-off temporary local variables and data transformations via non-mutative array methods.
 
 ## JavaScript modules
 
-JavaScript modules gives the benefit of object-oriented programming such as bundling of related private states, private functions with public functions to mutuate the states but in a free-form manner, without the straitjacket of a class.
+JavaScript modules gives the benefit of object-oriented programming such as bundling of related private states, private
+functions with public functions to mutuate the states but in a free-form manner, without the straitjacket of a class.
 
 ## TypeScript
 
-This allows every argument in every function to be tightly defined with the benefit of documentation and type checking at compile time to avoid most footguns.
+This allows every argument in every function to be tightly defined with the benefit of documentation and type checking
+at compile time to avoid most footguns.
 
 ## One set of rendering logic to rule them all
 
-The same `renderApp()` is always called after each database trip, which renders the whole app from scratch.  While arguably more expensive computationally, this vastly simplifies the task of coding as only one set of logic is needed for the whole app to be completely and correctly rendered.
+The same `renderApp()` is always called after each database trip, which renders the whole app from scratch. While
+arguably more expensive computationally, this vastly simplifies the task of coding as only one set of logic is needed
+for the whole app to be completely and correctly rendered.
 
-Computed data and conditions are crunched in a centralized `computeRenderParameters(…)` function and then shared by separate rendering logic for each part of the app. This enables the app to be D.R.Y. and always have a single source of truth.
+Computed data and conditions are crunched in a centralized `computeRenderParameters(…)` function and then shared by
+separate rendering logic for each part of the app. This enables the app to be D.R.Y. and always have a single source of
+truth.
 
 ## Initialization
 
-- If touch device detected, show unsupported message and throw error
+- If touch device *without* a fine pointing peripheral is detected, show unsupported message and throw error to stop execution
 - Set canvas absolute dimensions
 - Add event listeners for
     - Image Section
@@ -111,7 +119,7 @@ Computed data and conditions are crunched in a centralized `computeRenderParamet
 - Restore to "Upload New Image” label
 - Convert image to base-64 string
 - Create HTML Image element from base-64 string for drawing onto canvas
-- Compute image centered coordinates and resized dimensions
+- Compute image's centered coordinates and resized dimensions if found to be bigger than the canvas
 - Draw image on canvas
 - Saves to database and re-renders
 
@@ -134,7 +142,7 @@ Computed data and conditions are crunched in a centralized `computeRenderParamet
 
 ## Clear all tags
 
-- Get image ID from `dataset-index’s set on image title
+- Get image ID from `dataset-index` set on image title
 - Update tagged image by ID from database
 - Saves to database and re-renders
 
@@ -148,7 +156,8 @@ Computed data and conditions are crunched in a centralized `computeRenderParamet
 
 ## Indexed DB
 
-This is used to store images and tags so any number of images of any size can be used in the app. This is essential as nowadays each image easily take up a few megabytes and local storage can only handle up to 5 MB.
+This is used to store images and tags so any number of images of any size can be used in the app. This is essential as
+nowadays each image easily take up a few megabytes and local storage can only handle up to 5 MB.
 
 There is just one `TaggedImages` store. Data structure is as follows:
 
@@ -204,7 +213,8 @@ Every time a new image is deleted or loaded, this local storage item is updated.
 
 ### Facilitate fast canvas redraws
 
-The current image and its tags are cached to avoid any round trip to the database and allow fast redrawing of the canvas during user interaction.
+The current image and its tags are cached to avoid any round trip to the database and allow fast redrawing of the canvas
+during user interaction.
 
 ### Track mouse events and selection coordinates
 
@@ -214,11 +224,14 @@ Tracking across `mouseup`, `mousemove` and `mouseup` events to track:
 - duration of mouse movement when mouse button is down, and
 - start and end coordinates of the dragging
 
-These facilitate the drawing of the timely and accurate selection box and tag box and rejection of accidental clicking and dragging.
+These facilitate the drawing of the timely and accurate selection box and tag box and rejection of accidental clicking
+and dragging.
 
 ### Direct mutations only within `canvas.render.cache.ts` and `canvas.actions.cache.ts`
 
-Each cache is a JavaScript object with getters and setters to facilitate mutations. All direct mutations happen within `canvas.render.cache.ts`. All other JavaScript modules can only indirectly mutate the caches via exported functions.
+Each cache is a JavaScript object with getters and setters to facilitate mutations. All direct mutations happen
+within `canvas.render.cache.ts`. All other JavaScript modules can only indirectly mutate the caches via exported
+functions.
 
 # Canvas responsiveness
 
@@ -236,14 +249,16 @@ Each cache is a JavaScript object with getters and setters to facilitate mutatio
 
 When hovering over canvas, pointer changes to **crosshair** cursor to invite user to start dragging to tag.
 
-When hovering over existing tags, pointer changes to **text** cursor and the tags changes style to look like input box to invite users to click.
+When hovering over existing tags, pointer changes to **text** cursor and the tags changes style to look like input box
+to invite users to click.
 
 ## When no image is loaded
 
 - Canvas disabled from tagging and turns to darker grey
 - Image back and next button disabled
 - Clear all tags button disabled
-- User is hinted to upload new image with the placeholder title “Upload image to start” and “No image” in the image browser
+- User is hinted to upload new image with the placeholder title “Upload image to start” and “No image” in the image
+  browser
 
 ## When first image is loaded
 
@@ -253,13 +268,15 @@ The image automatically resizes to fit and is centered on the canvas.
 
 - As user clicks and drags, a blue translucent selection box is drawn
 - Once user releases the click, blue translucent box darkens to confirm selection
-- After a deliberate delay of 500ms to let user inspect what was selected, a browser prompt pops up for user to input the annotation
+- After a deliberate delay of 500ms to let user inspect what was selected, a browser prompt pops up for user to input
+  the annotation
 
 ### Threshold for selection rejection
 
-If selection box is smaller than 20px by 20px or dragging lasts shorter than 250 milliseconds, the selection will be rejected.
+If selection box is smaller than 20px by 20px or dragging lasts shorter than 250 milliseconds, the selection will be
+rejected.
 
-This guard imposed to avoid accidental clicking and dragging from creating unwanted tags, reducing annoyances. 
+This guard imposed to avoid accidental clicking and dragging from creating unwanted tags, reducing annoyances.
 
 ## When entering new tag annotation
 
