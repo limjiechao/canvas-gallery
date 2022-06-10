@@ -13,7 +13,7 @@ import {
 import { drawTaggedImageFromCache } from './canvas.render.cache';
 import {
   mouseButtonIsUp,
-  mouseMouseDurationExceedsRejectionThreshold,
+  mouseMoveDurationExceedsRejectionThreshold,
   resetMouseMoveTracking,
   resetSelectionTracking,
   selectionCoordinates,
@@ -42,7 +42,7 @@ async function handleMouseUp(event: MouseEvent): Promise<void> {
   updateMouseMoveHasStopped();
 
   if (
-    !mouseMouseDurationExceedsRejectionThreshold() ||
+    !mouseMoveDurationExceedsRejectionThreshold() ||
     !selectionDeltaExceedsRejectionThreshold()
   ) {
     drawTaggedImageFromCache();

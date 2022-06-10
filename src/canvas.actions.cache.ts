@@ -120,8 +120,8 @@ export function updateMouseMoveHasStopped() {
   mouseMove.stop();
 }
 
-export function mouseMouseDurationExceedsRejectionThreshold() {
-  log(mouseMouseDurationExceedsRejectionThreshold.name);
+export function mouseMoveDurationExceedsRejectionThreshold() {
+  log(mouseMoveDurationExceedsRejectionThreshold.name);
   return mouseMove.durationExceedsRejectionThreshold;
 }
 
